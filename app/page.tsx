@@ -29,17 +29,18 @@ export default function Home() {
     try {
       await new Promise(resolve => setTimeout(resolve, 2000));
 
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-001:generateContent?key=${API_KEY}`, {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${API_KEY}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: {
-            responseModalities: ['IMAGE', 'TEXT'],
-            temperature: 0.4,
-            seed: Math.floor(Math.random() * 1000000)
+          instances: [
+            { prompt: prompt }
+          ],
+          parameters: {
+            sampleCount: 1,
+            aspectRatio: "1:1"
           }
         }),
       });
@@ -68,19 +69,12 @@ export default function Home() {
       }
 
       const data = await response.json();
-      if (data.candidates && data.candidates[0]?.content?.parts) {
-        const imagePart = data.candidates[0].content.parts.find((part: { inlineData?: { data?: string } }) => part.inlineData);
-        if (imagePart && imagePart.inlineData && imagePart.inlineData.data) {
-          setResult(`data:image/png;base64,${imagePart.inlineData.data}`);
-          setCooldownSeconds(5);
-        } else {
-          setResult('No image generated. Please try a different prompt.');
-          setCanRequest(true);
-        }
+      if (data.predictions && data.predictions[0]?.bytesBase64Encoded) {
+        setResult(`data:image/png;base64,${data.predictions[0].bytesBase64Encoded}`);
+        setCooldownSeconds(5);
       } else {
-        setResult('Failed to generate image with Gemini Imagen 3.0');
+        setResult('No image generated. Please try a different prompt.');
         setCanRequest(true);
-        return;
       }
 
       const countdown = setInterval(() => {
@@ -148,7 +142,7 @@ export default function Home() {
         </div>
 
         <div className="mt-8 text-center text-sm text-gray-500">
-          <p>Powered by Google Gemini Imagen 3.0</p>
+          <p>Powered by Google Imagen 4.0</p>
           <p className="mt-2 text-xs">⚡ 5 second cooldown between generations to prevent rate limits</p>
         </div>
       </div>
