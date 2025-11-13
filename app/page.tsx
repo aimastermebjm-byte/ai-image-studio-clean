@@ -12,7 +12,7 @@ export default function Home() {
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [collagePrompt, setCollagePrompt] = useState('');
 
-  const API_KEY = 'AIzaSyA45tO0eOBz7zPfpii0xTbJaXOY1HmgRLk';
+  const API_KEY = '8f4b3a2bcf2e4c88b577c92513cc5635.GjJgfKoalt9zhk1L';
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -63,23 +63,19 @@ export default function Home() {
     try {
       await new Promise(resolve => setTimeout(resolve, 3000));
 
-      // For now, we'll create a simple collage description and use Imagen API
+      // Create collage description and use Z.AI CogView-4 API
       const collageDescription = `Create a beautiful collage combining ${uploadedImages.length} images in an artistic way: ${collagePrompt}. Style: digital art, seamless blending, professional composition.`;
 
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${API_KEY}`, {
+      const response = await fetch(`https://api.z.ai/api/paas/v4/images/generations`, {
         method: 'POST',
         headers: {
+          'Authorization': `Bearer ${API_KEY}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          instances: [
-            { prompt: collageDescription }
-          ],
-          parameters: {
-            sampleCount: 1,
-            aspectRatio: "1:1",
-            negativePrompt: "blurry, low quality, distorted"
-          }
+          model: 'cogView-4-250304',
+          prompt: collageDescription,
+          size: '1024x1024'
         }),
       });
 
@@ -107,8 +103,8 @@ export default function Home() {
       }
 
       const data = await response.json();
-      if (data.predictions && data.predictions[0]?.bytesBase64Encoded) {
-        setResult(`data:image/png;base64,${data.predictions[0].bytesBase64Encoded}`);
+      if (data.data && data.data[0]?.url) {
+        setResult(data.data[0].url);
         setCooldownSeconds(10);
       } else {
         setResult('Failed to generate collage. Please try again.');
@@ -152,19 +148,16 @@ export default function Home() {
     try {
       await new Promise(resolve => setTimeout(resolve, 2000));
 
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${API_KEY}`, {
+      const response = await fetch(`https://api.z.ai/api/paas/v4/images/generations`, {
         method: 'POST',
         headers: {
+          'Authorization': `Bearer ${API_KEY}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          instances: [
-            { prompt: prompt }
-          ],
-          parameters: {
-            sampleCount: 1,
-            aspectRatio: "1:1"
-          }
+          model: 'cogView-4-250304',
+          prompt: prompt,
+          size: '1024x1024'
         }),
       });
 
@@ -192,8 +185,8 @@ export default function Home() {
       }
 
       const data = await response.json();
-      if (data.predictions && data.predictions[0]?.bytesBase64Encoded) {
-        setResult(`data:image/png;base64,${data.predictions[0].bytesBase64Encoded}`);
+      if (data.data && data.data[0]?.url) {
+        setResult(data.data[0].url);
         setCooldownSeconds(5);
       } else {
         setResult('No image generated. Please try a different prompt.');
@@ -362,9 +355,10 @@ export default function Home() {
         </div>
 
         <div className="mt-8 text-center text-sm text-gray-500">
-          <p>Powered by Google Imagen 4.0</p>
+          <p>Powered by Z.AI CogView-4</p>
           <p className="mt-2 text-xs">⚡ 5-10 second cooldown between generations to prevent rate limits</p>
           <p className="mt-1 text-xs">🎨 Text Mode: Generate images from text | 🖼️ Collage Mode: Create artistic collages from your photos</p>
+          <p className="mt-1 text-xs">🇨🇳 Bilingual support for Chinese & English prompts</p>
         </div>
       </div>
     </div>
