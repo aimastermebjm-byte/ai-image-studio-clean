@@ -12,7 +12,7 @@ export default function Home() {
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [collagePrompt, setCollagePrompt] = useState('');
 
-  const API_KEY = 'AIzaSyDwqr_Ayx05UVQZExxCaq1PVBU8OzHvFss';
+  const API_KEY = 'AIzaSyA45tO0eOBz7zPfpii0xTbJaXOY1HmgRLk';
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
